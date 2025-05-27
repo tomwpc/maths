@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>➗ Le jeu des divisions</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f2faff; text-align: center; padding: 20px; }
+    h1 { color: #007acc; }
+    .btn { padding: 10px 20px; margin: 10px; font-size: 18px; cursor: pointer; }
+    #question { font-size: 24px; margin: 20px 0; }
+    #result { font-size: 20px; margin-top: 10px; }
+    #final-score { font-size: 22px; margin: 20px 0; font-weight: bold; }
+    .stars { font-size: 26px; color: gold; }
+  </style>
+</head>
+<body>
+  <h1>➗ Le jeu des divisions</h1>
+  <p>Choisis ton niveau :</p>
+  <button class="btn" onclick="startLevel(2, 4)">Niveau 1 : ÷2 à ÷4</button>
+  <button class="btn" onclick="startLevel(5, 7)">Niveau 2 : ÷5 à ÷7</button>
+  <button class="btn" onclick="startLevel(8, 10)">Niveau 3 : ÷8 à ÷10</button>
+
+  <div id="game" style="display:none;">
+    <p id="question"></p>
+    <div id="answers"></div>
+    <div id="result"></div>
+    <div id="final-score"></div>
+    <div id="star-rating" class="stars"></div>
+    <button class="btn" id="next-btn" style="display:none;" onclick="nextQuestion()">Question suivante</button>
+    <button class="btn" onclick="goToHome()" id="back-btn" style="display:none;">Retour à l'accueil</button>
+  </div>
+
+  <script>
+    let minDiv = 2;
+    let maxDiv = 4;
+    let currentAnswer = 0;
+    let score = 0;
+    let questionCount = 0;
+    const maxQuestions = 20;
+    let answered = false;
+
+    function startLevel(min, max) {
+      minDiv = min;
+      maxDiv = max;
+      score = 0;
+      questionCount = 0;
+      answered = false;
+      document.querySelector("h1").style.display = 'none';
+      document.querySelectorAll("button").forEach(btn => btn.style.display = 'none');
+      document.getElementById("game").style.display = 'block';
+      document.getElementById("final-score").textContent = '';
+      document.getElementById("star-rating").textContent = '';
+      document.getElementById("back-btn").style.display = 'none';
+      document.getElementById("next-btn").style.display = 'none';
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      if (questionCount >= maxQuestions) {
+        endGame();
+        return;
+      }
+
+      answered = false;
+      questionCount++;
+      let divisor = Math.floor(Math.random() * (maxDiv - minDiv + 1)) + minDiv;
+      let quotient = Math.floor(Math.random() * 10) + 1;
+      let dividend = divisor * quotient;
+      currentAnswer = quotient;
+      document.getElementById("question").textContent = `Question ${questionCount}/${maxQuestions} : Combien font ${dividend} ÷ ${divisor} ?`;
+      generateAnswers(currentAnswer);
+      document.getElementById("result").textContent = "";
+      document.getElementById("next-btn").style.display = 'none';
+    }
+
+    function generateAnswers(correct) {
+      const container = document.getElementById("answers");
+      container.innerHTML = '';
+      let answers = new Set([correct]);
+
+      while (answers.size < 4) {
+        let delta = Math.floor(Math.random() * 5) + 1;
+        let wrongAnswer = Math.random() < 0.5 ? correct + delta : correct - delta;
+        if (wrongAnswer > 0) answers.add(wrongAnswer);
+      }
+
+      const shuffledAnswers = Array.from(answers).sort(() => Math.random() - 0.5);
+
+      shuffledAnswers.forEach(value => {
+        let btn = document.createElement('button');
+        btn.textContent = value;
+        btn.className = 'btn';
+        btn.onclick = () => checkAnswer(value);
+        container.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(value) {
+      if (answered) return;
+      answered = true;
+      const result = document.getElementById("result");
+      if (value === currentAnswer) {
+        result.textContent = "✅ Bonne réponse !";
+        score++;
+      } else {
+        result.textContent = `❌ Mauvaise réponse. C'était ${currentAnswer}.`;
+      }
+      document.getElementById("next-btn").style.display = 'inline-block';
+    }
+
+    function getStarRating(score) {
+      if (score <= 2) return '★☆☆☆☆';
+      if (score <= 4) return '★☆☆☆☆';
+      if (score <= 6) return '★½☆☆☆';
+      if (score <= 8) return '★★☆☆☆';
+      if (score <= 10) return '★★½☆☆';
+      if (score <= 12) return '★★★☆☆';
+      if (score <= 14) return '★★★½☆';
+      if (score <= 16) return '★★★★☆';
+      if (score <= 18) return '★★★★½';
+      return '★★★★★';
+    }
+
+    function endGame() {
+      document.getElementById("question").textContent = "🎉 Fin du jeu !";
+      document.getElementById("answers").innerHTML = '';
+      document.getElementById("next-btn").style.display = 'none';
+      document.getElementById("result").textContent = "";
+      document.getElementById("final-score").textContent = `Tu as obtenu ${score} bonnes réponses sur ${maxQuestions}.`;
+      document.getElementById("star-rating").textContent = getStarRating(score);
+      document.getElementById("back-btn").style.display = 'inline-block';
+    }
+
+    function goToHome() {
+      location.reload();
+    }
+  </script>
+</body>
+</html>

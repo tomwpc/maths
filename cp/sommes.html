@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>🧮 Jeu des sommes - CP</title>
+  <style>
+    body { font-family: Verdana, sans-serif; text-align: center; background: #fff8e1; padding: 40px; }
+    h1 { color: #ff9800; font-size: 32px; }
+    .btn { font-size: 20px; padding: 10px 30px; margin: 10px; background-color: #ffb74d; border: none; border-radius: 10px; cursor: pointer; }
+    .btn:hover { background-color: #ffa726; }
+    .option-btn { font-size: 22px; padding: 15px 30px; margin: 10px; border-radius: 10px; border: 2px solid #ff9800; background: white; cursor: pointer; }
+    #result { font-size: 24px; margin: 15px; color: #4caf50; }
+    #question { font-size: 26px; margin: 20px; }
+    #score { font-size: 20px; margin-top: 30px; }
+    #stars { font-size: 32px; color: gold; margin-top: 10px; }
+	#top-back-btn { display: none; position: fixed; top: 20px; right: 20px; font-size: 16px; padding: 8px 16px; background-color: #ffb74d; color: black; border: none; border-radius: 10px; cursor: pointer; z-index: 1000; }
+#top-back-btn:hover {
+  background-color: #ffa726;
+}
+  </style>
+</head>
+<body>
+  <h1>🧮 Le jeu des sommes</h1>
+  <button onclick="goToHome()" id="top-back-btn">🏠 Accueil</button>
+  <p id="choose-level">Choisis ton niveau :</p>
+  <button class="btn" onclick="startLevel(1, 5)">Niveau 1</button>
+  <button class="btn" onclick="startLevel(3, 9)">Niveau 2</button>
+  <button class="btn" onclick="startLevel(6, 12)">Niveau 3</button>
+
+  <div id="game" style="display:none;">
+    <div id="question"></div>
+    <div id="answers"></div>
+    <div id="result"></div>
+    <button class="btn" onclick="nextQuestion()" id="next-btn" style="display:none;">Question suivante</button>
+    <div id="score"></div>
+    <div id="stars"></div>
+    <button class="btn" onclick="goToHome()" id="back-btn" style="display:none;">Retour à l'accueil</button>
+  </div>
+
+  <script>
+    let questions = [];
+    let current = 0;
+    let score = 0;
+    let selected = [];
+    const maxQuestions = 10;
+
+    function generateQuestion(min, max) {
+      let a, b;
+      let attempts = 0;
+      while (true) {
+        attempts++;
+        if (attempts > 100) break;
+        a = Math.floor(Math.random() * (max - min + 1)) + min;
+        b = Math.floor(Math.random() * (max - min + 1)) + min;
+        if (a === b) continue;
+
+        const sum = a + b;
+        const correct = [a, b];
+        const distractors = new Set(correct);
+
+        while (distractors.size < 4) {
+          const fake = Math.floor(Math.random() * (max - min + 1)) + min;
+          if (fake === sum || fake === a || fake === b || fake + a === sum || fake + b === sum) continue;
+          distractors.add(fake);
+        }
+
+        const options = Array.from(distractors);
+        let validPairs = 0;
+        for (let i = 0; i < options.length; i++) {
+          for (let j = i + 1; j < options.length; j++) {
+            if (options[i] + options[j] === sum) validPairs++;
+          }
+        }
+
+        if (validPairs === 1) {
+          return {
+            sum_target: sum,
+            options: options.sort(() => Math.random() - 0.5),
+            solution: correct,
+            correctPair: [a, b]
+          };
+        }
+      }
+      return { sum_target: 0, options: [0, 1, 2, 3], solution: [0, 1], correctPair: [0, 1] };
+    }
+
+    function startLevel(min, max) {
+      questions = [];
+      for (let i = 0; i < maxQuestions; i++) {
+        questions.push(generateQuestion(min, max));
+      }
+      current = 0;
+      score = 0;
+      selected = [];
+      document.getElementById('game').style.display = 'block';
+	  document.getElementById('top-back-btn').style.display = 'inline-block';
+document.getElementById('choose-level').style.display = 'none';
+      document.querySelectorAll('button.btn').forEach(btn => {
+  if (btn.id !== 'top-back-btn') btn.style.display = 'none';
+});
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      if (current >= questions.length) {
+        document.getElementById('question').textContent = "🎉 Fin du jeu !";
+        document.getElementById('answers').innerHTML = '';
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('result').textContent = '';
+        document.getElementById('score').textContent = `Tu as eu ${score} bonnes réponses sur ${questions.length} !`;
+        document.getElementById('back-btn').style.display = 'inline-block';
+        document.getElementById('stars').textContent = getStars(score);
+        return;
+      }
+
+      const q = questions[current];
+      document.getElementById('question').textContent = `Trouve deux nombres qui font ${q.sum_target}`;
+      const container = document.getElementById('answers');
+      container.innerHTML = '';
+      document.getElementById('result').textContent = '';
+      document.getElementById('next-btn').style.display = 'none';
+      selected = [];
+
+      q.options.forEach(n => {
+        const btn = document.createElement('button');
+        btn.textContent = n;
+        btn.className = 'option-btn';
+        btn.onclick = () => checkAnswer(n, btn, q);
+        container.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(n, btn, q) {
+      if (selected.includes(n)) return;
+      selected.push(n);
+      btn.style.backgroundColor = '#ffe082';
+
+      if (selected.length === 2) {
+        const sum = selected[0] + selected[1];
+        const correct = q.sum_target;
+        const isCorrect =
+          (sum === correct &&
+            ((selected[0] === q.correctPair[0] && selected[1] === q.correctPair[1]) ||
+             (selected[0] === q.correctPair[1] && selected[1] === q.correctPair[0])));
+
+        if (isCorrect) {
+          document.getElementById('result').textContent = "✅ Bravo !";
+          score++;
+        } else {
+          document.getElementById('result').textContent = `❌ Non, ${selected[0]} + ${selected[1]} = ${sum}`;
+          document.querySelectorAll('.option-btn').forEach(b => {
+            if (q.correctPair.includes(parseInt(b.textContent))) {
+              b.style.backgroundColor = '#c8e6c9';
+            }
+          });
+        }
+        document.getElementById('next-btn').style.display = 'inline-block';
+        current++;
+      }
+    }
+
+    function getStars(score) {
+      if (score <= 0) return '☆☆☆☆☆';
+      if (score <= 2) return '★☆☆☆☆';
+      if (score <= 4) return '★★☆☆☆';
+      if (score <= 6) return '★★★☆☆';
+      if (score <= 8) return '★★★★☆';
+      return '★★★★★';
+    }
+
+    function goToHome() {
+  location.reload();
+  document.getElementById('choose-level').style.display = 'block';
+  document.getElementById('top-back-btn').style.display = 'none';
+}
+  </script>
+</body>
+</html>

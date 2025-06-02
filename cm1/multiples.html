@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>✖️ Le jeu des Multiples</title>
+  <style>
+    body {
+      font-family: Verdana, sans-serif;
+      text-align: center;
+      background-color: #eaf6ff;
+      padding: 20px;
+    }
+    h1 {
+      color: #007acc;
+      font-size: 32px;
+    }
+    .btn {
+      padding: 15px 25px;
+      margin: 10px;
+      font-size: 18px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn:hover {
+      background-color: #388e3c;
+    }
+    .option {
+      font-size: 20px;
+      padding: 10px 20px;
+      margin: 10px;
+      border: 2px solid #4caf50;
+      border-radius: 10px;
+      background-color: white;
+      cursor: pointer;
+    }
+    .hidden {
+      display: none;
+    }
+    #feedback {
+      font-size: 24px;
+      margin: 15px;
+      font-weight: bold;
+      color: #007acc;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="btn" style="position: absolute; top: 20px; right: 20px;">🏠 Accueil</a>
+  <h1>✖️ <span style="color:#007acc">Multiples</span></h1>
+  <p id="choose-text">Choisis ton niveau de difficulté :</p>
+  <div id="levels">
+    <button class="btn" onclick="startLevel(2, 5)">Niveau 1 : x2 à x5</button>
+    <button class="btn" onclick="startLevel(6, 7)">Niveau 2 : x6 à x7</button>
+    <button class="btn" onclick="startLevel(8, 10)">Niveau 3 : x8 à x10</button>
+  </div>
+
+  <div id="game" class="hidden">
+    <div id="question" style="font-size: 24px; margin: 20px;"></div>
+    <div id="options"></div>
+    <div id="feedback"></div>
+    <button class="btn hidden" id="nextBtn" onclick="nextQuestion()">Question suivante</button>
+  </div>
+
+  <div id="final-score" class="hidden">
+    <h2>🎉 Fin du jeu !</h2>
+    <p id="score-text"></p>
+    <div id="stars" style="font-size: 30px; color: gold;"></div>
+    <button class="btn" onclick="goToHome()">Retour à l'accueil</button>
+  </div>
+
+  <script>
+    let questions = [];
+    let currentQuestion = 0;
+    let score = 0;
+    let correctAnswer = null;
+    let answered = false;
+
+    function startLevel(min, max) {
+      questions = [];
+      for (let i = 0; i < 20; i++) {
+        const a = Math.floor(Math.random() * (max - min + 1)) + min;
+        const b = Math.floor(Math.random() * 11);
+        const answer = a * b;
+        let options = new Set([answer]);
+        while (options.size < 4) {
+          options.add(Math.floor(Math.random() * 101));
+        }
+        questions.push({ q: `${a} x ${b} = ?`, answer: answer, options: shuffle(Array.from(options)) });
+      }
+      currentQuestion = 0;
+      score = 0;
+      document.getElementById("levels").classList.add("hidden");
+	  document.getElementById("choose-text").classList.add("hidden");
+      document.getElementById("game").classList.remove("hidden");
+      document.getElementById("final-score").classList.add("hidden");
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      if (currentQuestion >= questions.length) {
+        document.getElementById("game").classList.add("hidden");
+        document.getElementById("final-score").classList.remove("hidden");
+        document.getElementById("score-text").textContent = `Tu as eu ${score} bonnes réponses sur ${questions.length} !`;
+        document.getElementById("stars").textContent = getStars(score);
+        return;
+      }
+      const q = questions[currentQuestion];
+      document.getElementById("question").textContent = q.q;
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      document.getElementById("feedback").textContent = "";
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.className = "option";
+        btn.onclick = () => checkAnswer(opt);
+        optionsDiv.appendChild(btn);
+      });
+      correctAnswer = q.answer;
+      answered = false;
+      document.getElementById("nextBtn").classList.add("hidden");
+    }
+
+    function checkAnswer(selected) {
+      if (answered) return;
+      answered = true;
+      const feedback = document.getElementById("feedback");
+      if (selected === correctAnswer) {
+        feedback.textContent = "✅ Bravo !";
+        feedback.style.color = "green";
+        score++;
+      } else {
+        feedback.textContent = "❌ Mauvaise réponse. La bonne réponse était " + correctAnswer;
+        feedback.style.color = "red";
+      }
+      currentQuestion++;
+      document.getElementById("nextBtn").classList.remove("hidden");
+    }
+
+    function getStars(score) {
+      if (score <= 2) return "★☆☆☆☆";
+      if (score <= 5) return "★★☆☆☆";
+      if (score <= 10) return "★★★☆☆";
+      if (score <= 15) return "★★★★☆";
+      return "★★★★★";
+    }
+
+    function goToHome() {
+      location.reload();
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+  </script>
+</body>
+</html>

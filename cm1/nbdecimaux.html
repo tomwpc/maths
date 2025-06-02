@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Nombres décimaux (1)</title>
+  <style>
+    body {
+      font-family: Verdana, sans-serif;
+      text-align: center;
+      background-color: #eaf6ff;
+      padding: 20px;
+    }
+    h1 {
+      color: #007acc;
+      font-size: 32px;
+    }
+    .btn {
+      padding: 15px 25px;
+      margin: 10px;
+      font-size: 18px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn:hover {
+      background-color: #388e3c;
+    }
+    #question {
+      font-size: 24px;
+      margin: 20px 0;
+    }
+    .option {
+      font-size: 20px;
+      padding: 10px 20px;
+      margin: 10px;
+      border: 2px solid #4caf50;
+      border-radius: 10px;
+      background-color: white;
+      cursor: pointer;
+    }
+    #feedback {
+      font-size: 24px;
+      margin: 15px;
+      font-weight: bold;
+      color: #007acc;
+    }
+    #stars {
+      font-size: 28px;
+      margin-top: 10px;
+      color: gold;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="btn" style="position: absolute; top: 20px; right: 20px;">🏠 Accueil</a>
+  <h1>Nombres décimaux</h1>
+  <p id="choose-level">Choisis ton niveau :</p>
+  <button class="btn" onclick="startGame(1)">Niveau 1</button>
+  <button class="btn" onclick="startGame(2)">Niveau 2</button>
+  <button class="btn" onclick="startGame(3)">Niveau 3</button>
+
+  <div id="game" style="display:none;">
+    <div id="question"></div>
+    <div id="answers"></div>
+    <div id="feedback"></div>
+    <button class="btn" onclick="nextQuestion()" id="next-btn" style="display:none;">Question suivante</button>
+    <div id="score"></div>
+    <div id="stars"></div>
+  </div>
+
+  <script>
+    let questions = [];
+    let current = 0;
+    let score = 0;
+    let selected = false;
+
+    function generateDecimalQuestion(level) {
+      const questions = [];
+      for (let i = 0; i < 15; i++) {
+        let units = Math.floor(Math.random() * 9) + 1;
+        let tenths = Math.floor(Math.random() * 9) + 1;
+        let hundredths = Math.floor(Math.random() * 9) + 1;
+        let thousandths = Math.floor(Math.random() * 9) + 1;
+
+        let correctAnswer = '';
+        let questionText = '';
+
+        if (level === 1) {
+          correctAnswer = `${units}.${tenths}`;
+          questionText = `Combien vaut ${units} unités et ${tenths} dixièmes ?`;
+        } else if (level === 2) {
+          correctAnswer = `${units}.${tenths}${hundredths}`;
+          questionText = `Combien vaut ${units} unités, ${tenths} dixièmes et ${hundredths} centièmes ?`;
+        } else if (level === 3) {
+          correctAnswer = `${units}.${tenths}${hundredths}${thousandths}`;
+          questionText = `Combien vaut ${units} unités, ${tenths} dixièmes, ${hundredths} centièmes et ${thousandths} millièmes ?`;
+        }
+
+        const options = [correctAnswer];
+        while (options.length < 4) {
+          let fake = (units + Math.floor(Math.random() * 3)).toString() + '.' + Math.floor(Math.random() * 1000).toString().padStart(level, '0');
+          if (!options.includes(fake)) options.push(fake);
+        }
+        options.sort(() => Math.random() - 0.5);
+
+        questions.push({ q: questionText, a: correctAnswer, options });
+      }
+      return questions;
+    }
+
+    function startGame(level) {
+      questions = generateDecimalQuestion(level);
+      current = 0;
+      score = 0;
+      document.getElementById("choose-level").style.display = 'none';
+      document.querySelectorAll("button.btn").forEach(btn => btn.style.display = 'none');
+      document.getElementById("game").style.display = 'block';
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      selected = false;
+      if (current >= questions.length) {
+        document.getElementById("question").textContent = "🎉 Fin du jeu !";
+        document.getElementById("answers").innerHTML = '';
+        document.getElementById("feedback").textContent = '';
+        document.getElementById("score").textContent = `Tu as obtenu ${score} bonnes réponses sur ${questions.length}.`;
+        document.getElementById("stars").textContent = getStars(score);
+        document.getElementById("next-btn").style.display = 'none';
+        return;
+      }
+
+      const q = questions[current];
+      document.getElementById("question").textContent = q.q;
+      document.getElementById("feedback").textContent = '';
+      document.getElementById("answers").innerHTML = '';
+      document.getElementById("next-btn").style.display = 'none';
+
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.className = "option";
+        btn.onclick = () => checkAnswer(opt, btn, q.a);
+        document.getElementById("answers").appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selectedValue, btn, correctAnswer) {
+      if (selected) return;
+      selected = true;
+      if (selectedValue === correctAnswer) {
+        btn.style.backgroundColor = '#c8e6c9';
+        document.getElementById("feedback").textContent = "✅ Bonne réponse !";
+        score++;
+      } else {
+        btn.style.backgroundColor = '#ffcdd2';
+        document.getElementById("feedback").textContent = `❌ Mauvaise réponse. La bonne réponse était ${correctAnswer}`;
+      }
+      document.getElementById("next-btn").style.display = 'inline-block';
+      current++;
+    }
+
+    function getStars(score) {
+      if (score <= 1) return '★☆☆☆☆';
+      if (score <= 3) return '★★☆☆☆';
+      if (score <= 6) return '★★★☆☆';
+      if (score <= 9) return '★★★★☆';
+      return '★★★★★';
+    }
+  </script>
+</body>
+</html>

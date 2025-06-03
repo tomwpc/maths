@@ -62,6 +62,7 @@
   <button class="btn" onclick="startGame(1)">Niveau 1</button>
   <button class="btn" onclick="startGame(2)">Niveau 2</button>
   <button class="btn" onclick="startGame(3)">Niveau 3</button>
+  <button class="btn" onclick="startGame(4)">Niveau 4</button>
 
   <div id="game" style="display:none;">
     <div id="question"></div>
@@ -81,32 +82,57 @@
     function generateDecimalQuestion(level) {
       const questions = [];
       for (let i = 0; i < 15; i++) {
-        let units = Math.floor(Math.random() * 9) + 1;
-        let tenths = Math.floor(Math.random() * 9) + 1;
-        let hundredths = Math.floor(Math.random() * 9) + 1;
-        let thousandths = Math.floor(Math.random() * 9) + 1;
+        let u = Math.floor(Math.random() * 9) + 1;
+        let d = Math.floor(Math.random() * 9) + 1;
+        let c = Math.floor(Math.random() * 9) + 1;
+        let m = Math.floor(Math.random() * 9) + 1;
 
         let correctAnswer = '';
         let questionText = '';
+        let options = [];
 
         if (level === 1) {
-          correctAnswer = `${units}.${tenths}`;
-          questionText = `Combien vaut ${units} unités et ${tenths} dixièmes ?`;
+          correctAnswer = `${u}.${d}`;
+          questionText = `Combien vaut ${u} unités et ${d} dixièmes ?`;
+          options.push(correctAnswer);
+          while (options.length < 4) {
+            let fake = `${u}.${Math.floor(Math.random() * 9) + 1}`;
+            if (!options.includes(fake)) options.push(fake);
+          }
         } else if (level === 2) {
-          correctAnswer = `${units}.${tenths}${hundredths}`;
-          questionText = `Combien vaut ${units} unités, ${tenths} dixièmes et ${hundredths} centièmes ?`;
+          correctAnswer = `${u}.${d}${c}`;
+          questionText = `Combien vaut ${u} unités, ${d} dixièmes et ${c} centièmes ?`;
+          options.push(correctAnswer);
+          while (options.length < 4) {
+            let fake = `${u}.${d}${Math.floor(Math.random() * 9) + 1}`;
+            if (!options.includes(fake)) options.push(fake);
+          }
         } else if (level === 3) {
-          correctAnswer = `${units}.${tenths}${hundredths}${thousandths}`;
-          questionText = `Combien vaut ${units} unités, ${tenths} dixièmes, ${hundredths} centièmes et ${thousandths} millièmes ?`;
+          correctAnswer = `${u}.${d}${c}${m}`;
+          questionText = `Combien vaut ${u} unités, ${d} dixièmes, ${c} centièmes et ${m} millièmes ?`;
+          options.push(correctAnswer);
+          while (options.length < 4) {
+            let fake = `${u}.${d}${c}${Math.floor(Math.random() * 9) + 1}`;
+            if (!options.includes(fake)) options.push(fake);
+          }
+        } else if (level === 4) {
+          correctAnswer = `${u}.${d}${c}${m}`;
+          let elements = [
+            `${u} unités`,
+            `${d} dixièmes`,
+            `${c} centièmes`,
+            `${m} millièmes`
+          ];
+          elements.sort(() => Math.random() - 0.5);
+          questionText = `Combien vaut ${elements.join(', ')} ?`;
+          options.push(correctAnswer);
+          while (options.length < 4) {
+            let fake = `${u}.${d}${c}${Math.floor(Math.random() * 9) + 1}`;
+            if (!options.includes(fake)) options.push(fake);
+          }
         }
 
-        const options = [correctAnswer];
-        while (options.length < 4) {
-          let fake = (units + Math.floor(Math.random() * 3)).toString() + '.' + Math.floor(Math.random() * 1000).toString().padStart(level, '0');
-          if (!options.includes(fake)) options.push(fake);
-        }
         options.sort(() => Math.random() - 0.5);
-
         questions.push({ q: questionText, a: correctAnswer, options });
       }
       return questions;

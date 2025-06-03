@@ -10,23 +10,32 @@
       background: linear-gradient(to bottom, #ffffff, #e0f7fa);
       padding: 50px;
     }
+
     h1 {
       font-size: 32px;
       color: #007acc;
       margin-bottom: 40px;
     }
+
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+
     .game-button {
-      display: block;
-      width: 300px;
-      margin: 15px auto;
+      flex: 1 1 250px;
+      max-width: 300px;
       padding: 20px;
-      font-size: 22px;
+      font-size: 20px;
       color: white;
       background-color: #4caf50;
       border-radius: 12px;
       text-decoration: none;
       transition: background-color 0.3s;
     }
+
     .game-button:hover {
       background-color: #388e3c;
     }
@@ -34,10 +43,12 @@
 </head>
 <body>
   <h1>🎓 Jeux de maths - CM1</h1>
-  <a href="multiples.html" class="game-button">✖️ Jeu des Multiples</a>
-  <a href="divisions.html" class="game-button">➗ Jeu des Divisions</a>
-  <a href="fractions.html" class="game-button">🍰 Jeu des Fractions</a>
-  <a href="nbdecimaux.html" class="game-button">📘 Jeu des Nombres Décimaux (1)</a>
-  <a href="../index.html" class="game-button">🏠 Retour à la sélection des classes</a>
+  <div class="button-container">
+    <a href="multiples.html" class="game-button">✖️ Jeu des Multiples</a>
+    <a href="divisions.html" class="game-button">➗ Jeu des Divisions</a>
+    <a href="fractions.html" class="game-button">🍰 Jeu des Fractions</a>
+    <a href="nbdecimaux.html" class="game-button">📘 Nombres Décimaux (1)</a>
+    <a href="../index.html" class="game-button">🏠 Retour à la sélection des classes</a>
+  </div>
 </body>
 </html>

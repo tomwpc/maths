@@ -38,20 +38,22 @@
       background-color: white;
       cursor: pointer;
     }
-    .hidden {
-      display: none;
-    }
     #feedback {
       font-size: 24px;
       margin: 15px;
       font-weight: bold;
       color: #007acc;
     }
+    #stars {
+      font-size: 28px;
+      margin-top: 10px;
+      color: gold;
+    }
   </style>
 </head>
 <body>
   <a href="index.html" class="btn" style="position: absolute; top: 20px; right: 20px;">🏠 Accueil</a>
-  <h1>🍰 Fractions</h1>
+  <h1>🍰 Le jeu des fractions</h1>
   <p id="choose-text">Choisis ton niveau :</p>
   <button class="btn" onclick="startLevel(1)">Niveau 1</button>
   <button class="btn" onclick="startLevel(2)">Niveau 2</button>
@@ -60,10 +62,10 @@
   <div id="game" style="display:none;">
     <p id="question"></p>
     <div id="answers"></div>
-    <div id="result"></div>
-    <div id="final-score"></div>
-    <button class="btn" onclick="nextQuestion()">Question suivante</button>
-    <button class="btn" onclick="goToHome()" id="back-btn" style="display:none;">Retour à l'accueil</button>
+    <div id="feedback"></div>
+    <button class="btn" onclick="nextQuestion()" id="next-btn" style="display:none;">Question suivante</button>
+    <div id="score"></div>
+    <div id="stars"></div>
   </div>
 
   <script>
@@ -78,12 +80,7 @@
         { q: "Quelle fraction représente deux parts sur quatre ?", a: "2/4", options: ["1/2", "2/4", "3/4", "4/4"] },
         { q: "Quelle est la fraction qui représente une part sur cinq ?", a: "1/5", options: ["1/2", "1/3", "1/4", "1/5"] },
         { q: "Combien de sixièmes faut-il pour faire un entier ?", a: "6", options: ["5", "6", "7", "8"] },
-        { q: "Quelle est la fraction représentant deux parts sur trois ?", a: "2/3", options: ["1/2", "2/3", "3/4", "3/5"] },
-        { q: "Combien de quarts représentent la moitié d’un gâteau ?", a: "2", options: ["1", "2", "3", "4"] },
-        { q: "Quelle fraction représente 5 parts sur 6 ?", a: "5/6", options: ["1/6", "3/6", "5/6", "6/6"] },
-        { q: "Quelle fraction représente la totalité ?", a: "1", options: ["1/2", "2/2", "1", "3/4"] },
-        { q: "Quelle est la fraction représentant 2 parts sur 5 ?", a: "2/5", options: ["1/5", "2/5", "3/5", "4/5"] },
-        { q: "Combien de dixièmes faut-il pour faire un entier ?", a: "10", options: ["8", "9", "10", "11"] }
+        { q: "Quelle est la fraction représentant deux parts sur trois ?", a: "2/3", options: ["1/2", "2/3", "3/4", "3/5"] }
       ],
       2: [
         { q: "Laquelle de ces fractions est la plus petite ?", a: "1/5", options: ["1/2", "1/3", "1/4", "1/5"] },
@@ -95,12 +92,7 @@
         { q: "Laquelle de ces fractions est la plus petite ?", a: "1/10", options: ["1/5", "1/4", "1/3", "1/10"] },
         { q: "Quelle est la plus proche de la moitié ?", a: "4/8", options: ["2/8", "4/8", "6/8", "5/8"] },
         { q: "Quelle fraction est la plus grande ?", a: "6/7", options: ["1/7", "3/7", "4/7", "6/7"] },
-        { q: "Quelle fraction est plus petite que 1/3 ?", a: "1/4", options: ["1/2", "1/3", "1/4", "1/5"] },
-        { q: "Quelle fraction est équivalente à 2/4 ?", a: "1/2", options: ["1/3", "1/2", "2/3", "3/4"] },
-        { q: "Quelle fraction est équivalente à 3/6 ?", a: "1/2", options: ["1/3", "1/2", "2/3", "3/4"] },
-        { q: "Laquelle est plus proche de 1 ?", a: "8/9", options: ["1/2", "2/3", "7/9", "8/9"] },
-        { q: "Quelle est la plus grande ?", a: "9/10", options: ["3/4", "8/10", "9/10", "7/10"] },
-        { q: "Quelle fraction est équivalente à 5/10 ?", a: "1/2", options: ["2/3", "3/5", "1/2", "4/5"] }
+        { q: "Quelle fraction est équivalente à 2/4 ?", a: "1/2", options: ["1/3", "1/2", "2/3", "3/4"] }
       ],
       3: []
     };
@@ -110,63 +102,67 @@
     let questions = [];
     let current = 0;
     let score = 0;
+    let selected = false;
 
     function startLevel(level) {
       questions = levels[level];
       current = 0;
       score = 0;
-      document.getElementById("final-score").textContent = "";
-      document.querySelector("h1").style.display = 'none';
+      selected = false;
       document.getElementById("choose-text").style.display = 'none';
-      document.querySelectorAll("button").forEach(btn => btn.style.display = 'none');
+      document.querySelectorAll("button.btn").forEach(btn => btn.style.display = 'none');
       document.getElementById("game").style.display = 'block';
-      document.getElementById("back-btn").style.display = 'none';
       nextQuestion();
     }
 
     function nextQuestion() {
+      selected = false;
       if (current >= questions.length) {
-        document.getElementById("question").textContent = "🎉 Fin du niveau !";
+        document.getElementById("question").textContent = "🎉 Fin du jeu !";
         document.getElementById("answers").innerHTML = '';
-        document.getElementById("result").textContent = '';
-        document.getElementById("final-score").textContent = `Tu as obtenu ${score} bonnes réponses sur ${questions.length}.`;
-        document.getElementById("back-btn").style.display = 'inline-block';
+        document.getElementById("feedback").textContent = '';
+        document.getElementById("score").textContent = `Tu as obtenu ${score} bonnes réponses sur ${questions.length}.`;
+        document.getElementById("stars").textContent = getStars(score);
+        document.getElementById("next-btn").style.display = 'none';
         return;
       }
 
       const q = questions[current];
       document.getElementById("question").textContent = q.q;
-      document.getElementById("result").textContent = '';
-
-      const container = document.getElementById("answers");
-      container.innerHTML = '';
+      document.getElementById("feedback").textContent = '';
+      document.getElementById("answers").innerHTML = '';
+      document.getElementById("next-btn").style.display = 'none';
 
       q.options.forEach(opt => {
         const btn = document.createElement("button");
         btn.textContent = opt;
-        btn.className = "btn";
-        btn.onclick = () => checkAnswer(opt);
-        container.appendChild(btn);
+        btn.className = "option";
+        btn.onclick = () => checkAnswer(opt, btn, q.a);
+        document.getElementById("answers").appendChild(btn);
       });
     }
 
-    function checkAnswer(choice) {
-      const correct = questions[current].a;
-      if (choice === correct) {
-        document.getElementById("result").textContent = "✅ Bonne réponse !";
+    function checkAnswer(selectedValue, btn, correctAnswer) {
+      if (selected) return;
+      selected = true;
+      if (selectedValue === correctAnswer) {
+        btn.style.backgroundColor = '#c8e6c9';
+        document.getElementById("feedback").textContent = "✅ Bonne réponse !";
         score++;
-        current++;
-        setTimeout(nextQuestion, 1000);
       } else {
-        document.getElementById("result").textContent = `❌ Mauvaise réponse. Réessaie.`;
+        btn.style.backgroundColor = '#ffcdd2';
+        document.getElementById("feedback").textContent = `❌ Mauvaise réponse. La bonne réponse était ${correctAnswer}`;
       }
+      document.getElementById("next-btn").style.display = 'inline-block';
+      current++;
     }
 
-    function goToHome() {
-      document.getElementById("game").style.display = 'none';
-      document.querySelector("h1").style.display = 'block';
-      document.getElementById("choose-text").style.display = 'block';
-      document.querySelectorAll("button").forEach(btn => btn.style.display = 'inline-block');
+    function getStars(score) {
+      if (score <= 1) return '★☆☆☆☆';
+      if (score <= 3) return '★★☆☆☆';
+      if (score <= 6) return '★★★☆☆';
+      if (score <= 9) return '★★★★☆';
+      return '★★★★★';
     }
   </script>
 </body>
